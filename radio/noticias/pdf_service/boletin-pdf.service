@@ -1,0 +1,15 @@
+[Unit]
+Description=Radio AM - PDF Generator Service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/radio/noticias/pdf_service
+ExecStart=/opt/radio/venv/bin/uvicorn main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+Environment=PYTHONPATH=/opt/radio/noticias
+
+[Install]
+WantedBy=multi-user.target

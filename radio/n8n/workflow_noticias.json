@@ -1,0 +1,218 @@
+{
+  "name": "Radio AM - Boletin de Noticias",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "hours", "hoursInterval": 1}]
+        }
+      },
+      "id": "node-schedule",
+      "name": "Cada 1 hora",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.abc.com.py/arc/outboundfeeds/rss/?outputType=xml",
+        "options": {}
+      },
+      "id": "node-rss-abc",
+      "name": "RSS - ABC Color",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [300, 100]
+    },
+    {
+      "parameters": {
+        "url": "https://www.ultimahora.com/rss.xml",
+        "options": {}
+      },
+      "id": "node-rss-uh",
+      "name": "RSS - Ultima Hora",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [300, 220]
+    },
+    {
+      "parameters": {
+        "url": "https://www.lanacion.com.py/feed/",
+        "options": {}
+      },
+      "id": "node-rss-ln",
+      "name": "RSS - La Nacion",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [300, 340]
+    },
+    {
+      "parameters": {
+        "url": "https://www.radioguaira.com/feed/",
+        "options": {}
+      },
+      "id": "node-rss-guaira",
+      "name": "RSS - Radio Guaira",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [300, 460]
+    },
+    {
+      "parameters": {
+        "mode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "node-merge",
+      "name": "Unir todas las noticias",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Toma los items de todos los feeds y los normaliza\nconst items = $input.all();\nconst news = items.slice(0, 20).map(item => ({\n  source: item.json.feedUrl?.includes('abc') ? 'ABC Color'\n       : item.json.feedUrl?.includes('ultimahora') ? 'Ultima Hora'\n       : item.json.feedUrl?.includes('lanacion') ? 'La Nacion'\n       : 'Radio Guaira',\n  title: item.json.title || '',\n  summary: item.json.contentSnippet || item.json.content || '',\n  url: item.json.link || '',\n  published: item.json.pubDate || new Date().toISOString()\n}));\n\nreturn [{ json: { news, radio_name: 'Radio AM Villarrica' } }];"
+      },
+      "id": "node-normalize",
+      "name": "Normalizar noticias",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-api-key", "value": "={{ $vars.CLAUDE_API_KEY }}"},
+            {"name": "anthropic-version", "value": "2023-06-01"},
+            {"name": "content-type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "max_tokens",
+              "value": "1024"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"user\", \"content\": \"Sos el editor de Radio AM Villarrica. Recibis estas noticias en JSON y devuelves exactamente el mismo JSON pero con el campo 'summary' reescrito en maximo 2 oraciones, claro y directo para leer al aire en radio. Solo devuelve el JSON, sin texto adicional.\\n\\n\" + JSON.stringify($json.news)}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-claude",
+      "name": "Claude AI - Resumir para radio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrae el JSON del response de Claude y prepara para el PDF service\nconst claudeResponse = $json.content[0].text;\nlet news;\ntry {\n  news = JSON.parse(claudeResponse);\n} catch(e) {\n  // Fallback: usa las noticias sin resumir\n  news = $('Normalizar noticias').first().json.news;\n}\nreturn [{ json: { radio_name: 'Radio AM Villarrica', news } }];"
+      },
+      "id": "node-parse-claude",
+      "name": "Procesar respuesta Claude",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/generate-pdf",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "node-pdf",
+      "name": "Generar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $vars.EMAIL_SENDER }}",
+        "toEmail": "={{ $vars.EMAIL_RECIPIENTS }}",
+        "subject": "=Boletin de Noticias - Radio AM Villarrica - {{ $now.format('dd/MM/yyyy HH:mm') }}",
+        "emailType": "text",
+        "message": "=Adjunto el boletin de noticias de las {{ $now.format('HH:mm') }} hs.\n\n- Radio AM Villarrica",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "id": "node-email",
+      "name": "Enviar Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1520, 200],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURAR",
+          "name": "Gmail SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/{{ $vars.TWILIO_ACCOUNT_SID }}/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "From", "value": "whatsapp:+14155238886"},
+            {"name": "To", "value": "={{ $vars.WHATSAPP_RECIPIENTS }}"},
+            {"name": "Body", "value": "=*Radio AM Villarrica*\nBoletin de Noticias - {{ $now.format('dd/MM/yyyy HH:mm') }} hs\n\nEl boletin ya esta disponible. Revisa tu email para el PDF."}
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-whatsapp",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1520, 420]
+    }
+  ],
+  "connections": {
+    "Cada 1 hora": {
+      "main": [[{"node": "RSS - ABC Color", "type": "main", "index": 0}, {"node": "RSS - Ultima Hora", "type": "main", "index": 0}, {"node": "RSS - La Nacion", "type": "main", "index": 0}, {"node": "RSS - Radio Guaira", "type": "main", "index": 0}]]
+    },
+    "RSS - ABC Color": {"main": [[{"node": "Unir todas las noticias", "type": "main", "index": 0}]]},
+    "RSS - Ultima Hora": {"main": [[{"node": "Unir todas las noticias", "type": "main", "index": 1}]]},
+    "RSS - La Nacion": {"main": [[{"node": "Unir todas las noticias", "type": "main", "index": 2}]]},
+    "RSS - Radio Guaira": {"main": [[{"node": "Unir todas las noticias", "type": "main", "index": 3}]]},
+    "Unir todas las noticias": {"main": [[{"node": "Normalizar noticias", "type": "main", "index": 0}]]},
+    "Normalizar noticias": {"main": [[{"node": "Claude AI - Resumir para radio", "type": "main", "index": 0}]]},
+    "Claude AI - Resumir para radio": {"main": [[{"node": "Procesar respuesta Claude", "type": "main", "index": 0}]]},
+    "Procesar respuesta Claude": {"main": [[{"node": "Generar PDF", "type": "main", "index": 0}]]},
+    "Generar PDF": {
+      "main": [[
+        {"node": "Enviar Email", "type": "main", "index": 0},
+        {"node": "Enviar WhatsApp", "type": "main", "index": 0}
+      ]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
