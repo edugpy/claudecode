@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <!-- Gradiente fondo del escudo -->
+    <radialGradient id="bgGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1a3a6e"/>
+      <stop offset="100%" stop-color="#0a1f3d"/>
+    </radialGradient>
+    <!-- Gradiente dorado para detalles -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="50%" stop-color="#f5c518"/>
+      <stop offset="100%" stop-color="#c9930a"/>
+    </linearGradient>
+    <!-- Gradiente rojo para llama -->
+    <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#e63012"/>
+      <stop offset="50%" stop-color="#f5820a"/>
+      <stop offset="100%" stop-color="#ffd700"/>
+    </linearGradient>
+    <!-- Sombra -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <!-- Texto en arco: path circular -->
+    <path id="topArc" d="M 80,250 A 170,170 0 0,1 420,250" fill="none"/>
+    <path id="bottomArc" d="M 95,290 A 160,160 0 0,0 405,290" fill="none"/>
+  </defs>
+
+  <!-- ===== FONDO CIRCULAR EXTERIOR (borde dorado) ===== -->
+  <circle cx="250" cy="250" r="235" fill="url(#goldGrad)" filter="url(#shadow)"/>
+  <!-- Aro negro -->
+  <circle cx="250" cy="250" r="220" fill="#111"/>
+  <!-- Aro interior dorado delgado -->
+  <circle cx="250" cy="250" r="210" fill="none" stroke="#f5c518" stroke-width="3"/>
+
+  <!-- ===== FONDO PRINCIPAL DEL EMBLEMA ===== -->
+  <circle cx="250" cy="250" r="200" fill="url(#bgGrad)"/>
+
+  <!-- ===== BANDA ROJA DIAGONAL (estilo clásico estación de servicio) ===== -->
+  <clipPath id="circleClip">
+    <circle cx="250" cy="250" r="200"/>
+  </clipPath>
+  <rect x="0" y="295" width="500" height="70" fill="#c0191a" clip-path="url(#circleClip)"/>
+  <!-- Línea dorada superior e inferior de la banda -->
+  <rect x="0" y="292" width="500" height="4" fill="#f5c518" clip-path="url(#circleClip)"/>
+  <rect x="0" y="365" width="500" height="4" fill="#f5c518" clip-path="url(#circleClip)"/>
+
+  <!-- ===== LLAMA / GOTA DE COMBUSTIBLE (centro superior) ===== -->
+  <!-- Llama grande -->
+  <g transform="translate(250, 135)">
+    <!-- Gota/llama forma -->
+    <path d="M 0,-60 C -18,-35 -30,-10 -28,10 C -26,35 -14,52 0,58 C 14,52 26,35 28,10 C 30,-10 18,-35 0,-60 Z"
+          fill="url(#flameGrad)" opacity="0.95"/>
+    <!-- Núcleo interno más brillante -->
+    <path d="M 0,-30 C -9,-15 -15,0 -13,12 C -11,24 -6,33 0,36 C 6,33 11,24 13,12 C 15,0 9,-15 0,-30 Z"
+          fill="#fff8c0" opacity="0.7"/>
+  </g>
+
+  <!-- ===== ESTRELLA GRANDE CENTRAL ===== -->
+  <!-- Estrella de 8 puntas (estilo emblema) -->
+  <g transform="translate(250, 220)">
+    <!-- Estrella exterior dorada -->
+    <polygon points="0,-52 12,-16 48,-16 20,6 30,42 0,22 -30,42 -20,6 -48,-16 -12,-16"
+             fill="url(#goldGrad)" stroke="#c9930a" stroke-width="1"/>
+    <!-- Estrella interior blanca/azul -->
+    <polygon points="0,-30 7,-9 28,-9 12,3 17,24 0,13 -17,24 -12,3 -28,-9 -7,-9"
+             fill="#d8eaff" stroke="#a0c0f0" stroke-width="0.5"/>
+  </g>
+
+  <!-- ===== CRUZ DEL SUR (constelación) — esquina superior derecha ===== -->
+  <!-- 4 estrellas pequeñas formando la Cruz del Sur -->
+  <!-- Estrella top (alfa Crucis) -->
+  <polygon points="320,100 323,110 334,110 325,116 328,127 320,121 312,127 315,116 306,110 317,110"
+           fill="#f5c518" opacity="0.9"/>
+  <!-- Estrella derecha (beta Crucis) -->
+  <polygon points="355,140 357,147 364,147 358,151 360,158 355,154 350,158 352,151 346,147 353,147"
+           fill="#f5c518" opacity="0.8"/>
+  <!-- Estrella bottom (gamma Crucis) -->
+  <polygon points="328,175 330,181 337,181 332,185 333,191 328,187 323,191 324,185 319,181 326,181"
+           fill="#f5c518" opacity="0.8"/>
+  <!-- Estrella izquierda (delta Crucis) -->
+  <polygon points="293,150 295,156 302,156 297,160 298,166 293,162 288,166 289,160 284,156 291,156"
+           fill="#f5c518" opacity="0.7"/>
+  <!-- Estrella pequeña (épsilon) -->
+  <polygon points="345,165 346,169 350,169 347,171 348,175 345,173 342,175 343,171 340,169 344,169"
+           fill="#f5c518" opacity="0.6"/>
+
+  <!-- ===== TEXTO EN LA BANDA ROJA ===== -->
+  <text x="250" y="340" text-anchor="middle" font-family="Arial Black, Arial, sans-serif"
+        font-size="22" font-weight="900" fill="#ffffff" letter-spacing="1">
+    ESTRELLA DEL SUR
+  </text>
+
+  <!-- ===== TEXTO CURVO SUPERIOR ===== -->
+  <text font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#f5c518" letter-spacing="2">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+      ESTACIONES  DE  SERVICIO
+    </textPath>
+  </text>
+
+  <!-- ===== TEXTO INFERIOR (curvo) ===== -->
+  <text font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#a0c0f0" letter-spacing="3">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+      ✦  VILLARRICA · PARAGUAY  ✦
+    </textPath>
+  </text>
+
+  <!-- ===== DETALLES: pequeñas estrellas decorativas ===== -->
+  <circle cx="115" cy="250" r="3" fill="#f5c518" opacity="0.7"/>
+  <circle cx="385" cy="250" r="3" fill="#f5c518" opacity="0.7"/>
+  <circle cx="108" cy="265" r="2" fill="#f5c518" opacity="0.5"/>
+  <circle cx="392" cy="265" r="2" fill="#f5c518" opacity="0.5"/>
+
+  <!-- ===== BORDE EXTERIOR FINAL ===== -->
+  <circle cx="250" cy="250" r="235" fill="none" stroke="#f5c518" stroke-width="2" opacity="0.6"/>
+</svg>
