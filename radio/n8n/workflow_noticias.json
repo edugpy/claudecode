@@ -15,7 +15,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.abc.com.py/arc/outboundfeeds/rss/?outputType=xml",
+        "url": "https://news.google.com/rss/search?q=site:abc.com.py&hl=es-419&gl=PY&ceid=PY:es-419",
         "options": {}
       },
       "id": "node-rss-abc",
@@ -26,7 +26,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.ultimahora.com/rss.xml",
+        "url": "https://news.google.com/rss/search?q=site:ultimahora.com&hl=es-419&gl=PY&ceid=PY:es-419",
         "options": {}
       },
       "id": "node-rss-uh",
@@ -37,7 +37,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.lanacion.com.py/feed/",
+        "url": "https://news.google.com/rss/search?q=site:lanacion.com.py&hl=es-419&gl=PY&ceid=PY:es-419",
         "options": {}
       },
       "id": "node-rss-ln",
@@ -59,7 +59,7 @@
     },
     {
       "parameters": {
-        "mode": "mergeByPosition",
+        "mode": "append",
         "options": {}
       },
       "id": "node-merge",
@@ -70,7 +70,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Toma los items de todos los feeds y los normaliza\nconst items = $input.all();\nconst news = items.slice(0, 20).map(item => ({\n  source: item.json.feedUrl?.includes('abc') ? 'ABC Color'\n       : item.json.feedUrl?.includes('ultimahora') ? 'Ultima Hora'\n       : item.json.feedUrl?.includes('lanacion') ? 'La Nacion'\n       : 'Radio Guaira',\n  title: item.json.title || '',\n  summary: item.json.contentSnippet || item.json.content || '',\n  url: item.json.link || '',\n  published: item.json.pubDate || new Date().toISOString()\n}));\n\nreturn [{ json: { news, radio_name: 'Radio AM Villarrica' } }];"
+        "jsCode": "// Toma los items de todos los feeds y los normaliza\nconst items = $input.all();\nconst news = items.slice(0, 20).map(item => {\n  const link = item.json.link || '';\n  const source = link.includes('abc.com.py') ? 'ABC Color'\n               : link.includes('ultimahora.com') ? 'Ultima Hora'\n               : link.includes('lanacion.com.py') ? 'La Nacion'\n               : 'Radio Guaira';\n  return {\n    source,\n    title: item.json.title || '',\n    summary: item.json.contentSnippet || item.json.content || '',\n    url: link,\n    published: item.json.pubDate || new Date().toISOString()\n  };\n});\n\nreturn [{ json: { news, radio_name: 'Radio AM Villarrica' } }];"
       },
       "id": "node-normalize",
       "name": "Normalizar noticias",
